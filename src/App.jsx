@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, BarChart, User, CheckCircle } from 'lucide-react';
+import { Settings, BarChart, User, CheckCircle, SkipForward } from 'lucide-react';
 
 function App() {
   const [mode, setMode] = useState('focus'); // 'focus' | 'break'
@@ -10,8 +10,9 @@ function App() {
 
   // Dynamic Theme Colors based on mode
   const isFocus = mode === 'focus';
-  const bgColor = isFocus ? 'bg-[#BA4949]' : 'bg-[#38858A]';
-  const buttonTextColor = isFocus ? 'text-[#BA4949]' : 'text-[#38858A]';
+  const isActiveFocus = isFocus && isRunning;
+  const bgColor = isActiveFocus ? 'bg-[#1a1a1a]' : (isFocus ? 'bg-[#BA4949]' : 'bg-[#38858A]');
+  const buttonTextColor = isActiveFocus ? 'text-[#1a1a1a]' : (isFocus ? 'text-[#BA4949]' : 'text-[#38858A]');
 
   // --- Favicon Update (Static White) ---
   useEffect(() => {
@@ -121,32 +122,38 @@ function App() {
   };
 
   const toggleTimer = () => {
-    if (mode === 'focus') {
-      if (!isRunning) {
-        setIsRunning(true);
-      } else {
-        // Stop Focus & Transition to Break
-        setIsRunning(false); 
-        const breakTime = Math.floor(time * 0.20);
-        setMode('break');
-        setTime(breakTime);
-      }
-    } else {
-      // Break Mode Logic (Pause/Resume)
-      setIsRunning(!isRunning);
-    }
+    setIsRunning(!isRunning);
   };
 
   const handleModeSwitch = (newMode) => {
     setMode(newMode);
     setIsRunning(false);
-    setTime(0);
+    if (newMode === 'focus') {
+       setTime(0);
+    } else {
+       // If switching to break manually via tabs, maybe we default to 0 or calculate? 
+       // Existing logic set it to 0. Let's keep it consistent with 'handleNextMode' if possible, 
+       // but tabs usually reset. The previous logic for handleModeSwitch was just setTime(0).
+       setTime(0);
+    }
+  };
+
+  const handleNextMode = () => {
+    setIsRunning(false);
+    if (mode === 'focus') {
+      const breakTime = Math.floor(time * 0.20);
+      setMode('break');
+      setTime(breakTime);
+    } else {
+      setMode('focus');
+      setTime(0);
+    }
   };
 
   // --- Button Text ---
   const getButtonText = () => {
     if (mode === 'focus') {
-      return isRunning ? 'FOCUSING' : 'START FOCUS';
+      return isRunning ? 'PAUSE' : 'START FOCUS';
     } else {
       return isRunning ? 'PAUSE' : 'START BREAK';
     }
@@ -194,20 +201,36 @@ function App() {
             {formatTime(time)}
           </div>
 
-          {/* Main Action Button */}
-          <button 
-            onClick={toggleTimer}
-            className={`
-              w-full max-w-[320px] h-[80px] bg-white rounded-2xl 
-              ${buttonTextColor} text-2xl font-bold uppercase tracking-widest
-              shadow-[0_4px_0_rgb(0,0,0,0.1)] hover:shadow-[0_2px_0_rgb(0,0,0,0.1)] 
-              active:shadow-none active:translate-y-[4px] 
-              transition-all ease-out duration-150
-              flex items-center justify-center px-8
-            `}
-          >
-            {getButtonText()}
-          </button>
+          {/* Main Action Buttons */}
+          <div className="flex items-center gap-4 w-full justify-center max-w-[420px]">
+            <button 
+              onClick={toggleTimer}
+              className={`
+                flex-1 h-[80px] bg-white rounded-2xl 
+                ${buttonTextColor} text-2xl font-bold uppercase tracking-widest
+                shadow-[0_4px_0_rgb(0,0,0,0.1)] hover:shadow-[0_2px_0_rgb(0,0,0,0.1)] 
+                active:shadow-none active:translate-y-[4px] 
+                transition-all ease-out duration-150
+                flex items-center justify-center px-8
+              `}
+            >
+              {getButtonText()}
+            </button>
+            
+            <button
+              onClick={handleNextMode}
+              className={`
+                w-[80px] h-[80px] bg-white/20 rounded-2xl
+                text-white
+                shadow-[0_4px_0_rgb(0,0,0,0.1)] hover:shadow-[0_2px_0_rgb(0,0,0,0.1)] hover:bg-white/30
+                active:shadow-none active:translate-y-[4px]
+                transition-all ease-out duration-150
+                flex items-center justify-center
+              `}
+            >
+              <SkipForward size={32} />
+            </button>
+          </div>
         </div>
 
       </main>
