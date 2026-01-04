@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
+import { ProductInfo } from './components/layout/ProductInfo';
 import { ModeTabs } from './components/timer/ModeTabs';
 import { TimerDisplay } from './components/timer/TimerDisplay';
 import { TimerControls } from './components/timer/TimerControls';
@@ -47,6 +48,18 @@ function MainTimer() {
   );
 }
 
+function Home() {
+  return (
+    <div className="w-full flex flex-col items-center">
+      <div className="w-full min-h-[calc(100vh-64px)] flex flex-col items-center justify-start pt-8 sm:pt-20 pb-16">
+        <MainTimer />
+      </div>
+      <ProductInfo />
+      <Footer />
+    </div>
+  );
+}
+
 function AppContent() {
   useFavicon();
   const { bgColor } = usePomodoroContext();
@@ -55,16 +68,20 @@ function AppContent() {
     <div className={`min-h-svh w-full transition-colors duration-500 ease-in-out ${bgColor} font-sans text-white flex flex-col items-center overflow-x-hidden`}>
       <Header />
       
-      <main className="w-full flex-1 flex flex-col items-center justify-start pt-8 sm:pt-16 pb-8">
+      <main className="w-full flex-1">
         <Routes>
-          <Route path="/" element={<MainTimer />} />
-          <Route path="/signup" element={<AuthPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/finish-signup" element={<FinishSignupPage />} />
+          <Route path="/" element={<Home />} />
+          <Route path="*" element={
+            <div className="w-full flex flex-col items-center justify-start pt-8 sm:pt-16 pb-8">
+              <Routes>
+                <Route path="/signup" element={<AuthPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/finish-signup" element={<FinishSignupPage />} />
+              </Routes>
+            </div>
+          } />
         </Routes>
       </main>
-
-      <Footer />
     </div>
   );
 }
